@@ -1,0 +1,17 @@
+{
+  "name": "portkill",
+  "version": "1.0.0",
+  "description": "Find and kill the processes occupying ports.",
+  "main": "index.js",
+  "bin": {
+    "portkill": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Rishabh Sharma",
+  "license": "MIT",
+  "type": "module"
+}
