@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { findProcess } from "./port.js";
+import { killProcess } from "./process.js";
 
 const args = process.argv.slice(2);
 
@@ -32,12 +33,18 @@ for (const port of args) {
     const pid = await findProcess(port);
 
     if (!pid) {
-        console.log(`Nothing is using the port ${port}`);
+        console.log(`The port ${port} is not in use.`);
         continue;
     }
 
-    console.log(`Port ${port} is being used by PID ${pid}`);
-}
+    console.log(`Port ${port} is being used by PID ${pid}.`);
 
-console.log(args)
-console.log(`Command: ${command}`)
+    const killed = killProcess(pid);
+
+    if (killed) {
+        console.log(`Process ${pid} terminated.`)
+    } else {
+        console.log(`Failed to terminate the process ${pid}.`)
+    }
+
+}
