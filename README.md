@@ -84,7 +84,7 @@ sudo portkill 80
 Clone the repository and link it locally to test changes:
 
 ```bash
-git clone https://github.com/rishabhsharma/portkill.git
+git clone https://github.com/rishhbh/portkill.git
 cd portkill
 npm link
 ```
