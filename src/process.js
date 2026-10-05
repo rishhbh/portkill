@@ -3,6 +3,7 @@ export function killProcess(pid) {
         process.kill(Number(pid), "SIGTERM");
         return true;
     } catch (err) {
+        console.error(err)
         return false;
     }
 }
