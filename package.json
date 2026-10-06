@@ -1,9 +1,9 @@
 {
-  "name": "portkill",
+  "name": "purgeport",
   "version": "0.1.0",
   "description": "Find and kill the processes occupying ports.",
   "bin": {
-    "portkill": "./src/cli.js"
+    "purgeport": "./src/cli.js"
   },
   "scripts": {
     "start": "node src/cli.js"
@@ -17,6 +17,14 @@
     "ports",
     "processes"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rishhbh/purgeport.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rishhbh/purgeport/issues"
+  },
+  "homepage": "https://github.com/rishhbh/purgeport#readme",
   "author": "Rishabh Sharma",
   "license": "MIT",
   "type": "module"
