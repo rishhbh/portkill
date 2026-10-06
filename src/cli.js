@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { findProcess } from "./port.js";
-import { killProcess } from "./process.js";
+import { killProcess, getProcessInfo, getExecutable } from "./process.js";
 import { ask } from "./prompt.js";
 import packageJson from "../package.json" with { type: "json" };
 
@@ -45,7 +45,13 @@ for (const port of args) {
         continue;
     }
 
+    const info = await getProcessInfo(pid);
+    const executable = await getExecutable(pid);
+
+    info.process = executable;
+
     console.log(`Port ${port} is being used by PID ${pid}.`);
+    console.log(`\nUser: ${info.user}\nCommand: ${info.args}\nProcess: ${info.process}\n`);
 
     const answer = await ask("Kill this process? [y/n]: ");
 
@@ -53,13 +59,11 @@ for (const port of args) {
         const killed = killProcess(pid);
 
         if (killed) {
-            console.log(`Process ${pid} terminated.`)
+            console.log(`Process ${pid} terminated.\n`)
         } else {
             console.log(`Failed to terminate the process ${pid}.`)
         }
     } else {
         console.log(`Process ${pid} was not terminated.`);
     }
-
-
 }
