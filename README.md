@@ -4,16 +4,24 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Ever run into `Error: listen EADDRINUSE: address already in use :::3000` while developing? **portkill** quickly terminates the process hogging your port so you can get back to building without searching for PIDs manually.
+Ever run into `Error: listen EADDRINUSE: address already in use :::3000` while developing? **portkill** detects which process is hogging your port and terminates it after confirmation, without needing to search for PIDs manually.
 
 ---
 
-## Features
+## Features (Currently Available)
 
-- **Fast & Lightweight:** Kill processes by port number in one command.
-- **No PID lookup required:** Automatically detects and terminates the culprit process.
-- **Cross-Platform:** Works on Linux, macOS, and Windows.
-- **Zero Hassle:** Use directly via `npx` or install globally.
+- **Port Lookup:** Automatically identifies the process (PID) occupying a given port.
+- **Interactive Safety Check:** Prompts for confirmation (`[y/n]`) before terminating any process.
+- **Multi-Port Support:** Check and terminate processes across multiple ports in a single command.
+- **Zero Runtime Dependencies:** Built purely using Node.js standard libraries and system utilities.
+- **CLI Flags:** Includes `-h` / `--help` and `-v` / `--version`.
+
+---
+
+## Prerequisites
+
+- **Node.js** (v18.0.0 or higher recommended, ESM support)
+- **Linux or macOS** with `lsof` installed (standard on macOS and most Linux distributions)
 
 ---
 
@@ -36,7 +44,7 @@ yarn global add portkill
 
 ### Running without Installation
 
-You can also run it on demand without installing globally:
+Run directly on demand via `npx`:
 
 ```bash
 npx portkill <port>
@@ -49,21 +57,28 @@ npx portkill <port>
 ### Kill a process on a specific port
 
 ```bash
-portkill <port>
-```
-
-**Example:**
-
-```bash
 portkill 3000
 ```
 
-### Usage Options
+When a process is detected, you will be prompted to confirm termination:
 
 ```text
-Usage:
-  portkill <port>       Kill process running on the specified port
-  portkill all          Kill all processes occupying listening ports
+Port 3000 is being used by PID 41280.
+Kill this process? [y/n]: y
+Process 41280 terminated.
+```
+
+### Kill processes across multiple ports
+
+```bash
+portkill 3000 8080 5000
+```
+
+### CLI Options
+
+```bash
+portkill --help       # Show help message
+portkill --version    # Show installed version
 ```
 
 ---
@@ -90,6 +105,21 @@ npm link
 ```
 
 Now you can test changes using `portkill <port>` directly from your terminal.
+
+---
+
+## Future Improvements & Technical Roadmap
+
+The following features are planned for upcoming releases:
+
+- **`portkill all` Implementation:** Automatically discover and terminate all processes currently listening on network ports.
+- **Native Windows Support:** Add native Windows process resolution and termination (`netstat -ano`, PowerShell `Get-NetTCPConnection`, `taskkill`) to remove the `lsof` dependency.
+- **Force Mode (`-f` / `--force`):** Allow bypassing the interactive confirmation prompt for non-interactive scripts and CI workflows.
+- **Configurable Kill Signals (`-s` / `--signal`):** Support escalation from `SIGTERM` to `SIGKILL` (`kill -9`) for unresponsive processes.
+- **Multi-PID Handling per Port:** Properly parse and terminate multiple processes sharing or bound to the same port.
+- **Process Inspection:** Display process names, executable paths, or command arguments alongside the PID before prompting for termination.
+- **Port Ranges:** Support scanning and killing port ranges (e.g. `portkill 3000-3005`).
+- **Protocol Filtering:** Add options to filter by protocol (`--tcp` or `--udp`).
 
 ---
 

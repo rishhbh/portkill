@@ -3,10 +3,16 @@
 import { findProcess } from "./port.js";
 import { killProcess } from "./process.js";
 import { ask } from "./prompt.js";
+import packageJson from "../package.json" with { type: "json" };
 
 const args = process.argv.slice(2);
 
 const command = args[0];
+
+if (args.includes("--version") || args.includes("-v")) {
+    console.log(packageJson.version);
+    process.exit(0);
+}
 
 if (args.includes('--help') || args.includes('-h')) {
     console.log(`portkill - Kill processes using network ports
