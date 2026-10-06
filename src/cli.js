@@ -15,11 +15,11 @@ if (args.includes("--version") || args.includes("-v")) {
 }
 
 if (args.includes('--help') || args.includes('-h')) {
-    console.log(`portkill - Kill processes using network ports
+    console.log(`purgekill - Kill processes using network ports
 
 Usage:
-  portkill <port>...
-  portkill all
+  purgekill <port>...
+  purgekill all
 
 Options:
   -h, --help       Show help
@@ -31,8 +31,8 @@ Options:
 
 if (!command) {
     console.log(`Usage:
-- portkill <port>
-- portkill all`);
+- purgekill <port>
+- purgekill all`);
 
     process.exit(1);
 }

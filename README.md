@@ -1,10 +1,10 @@
-# portkill
+# purgekill
 
 > A fast and simple CLI tool to find and kill processes occupying network ports.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Ever run into `Error: listen EADDRINUSE: address already in use :::3000` while developing? **portkill** detects which process is hogging your port and terminates it after confirmation, without needing to search for PIDs manually.
+Ever run into `Error: listen EADDRINUSE: address already in use :::3000` while developing? **purgekill** detects which process is hogging your port and terminates it after confirmation, without needing to search for PIDs manually.
 
 ---
 
@@ -33,13 +33,13 @@ Install globally using your favorite package manager:
 
 ```bash
 # Using npm
-npm install -g portkill
+npm install -g purgekill
 
 # Using pnpm
-pnpm add -g portkill
+pnpm add -g purgekill
 
 # Using yarn
-yarn global add portkill
+yarn global add purgekill
 ```
 
 ### Running without Installation
@@ -47,7 +47,7 @@ yarn global add portkill
 Run directly on demand via `npx`:
 
 ```bash
-npx portkill <port>
+npx purgekill <port>
 ```
 
 ---
@@ -57,7 +57,7 @@ npx portkill <port>
 ### Kill a process on a specific port
 
 ```bash
-portkill 3000
+purgekill 3000
 ```
 
 When a process is detected, you will be prompted to confirm termination:
@@ -71,14 +71,14 @@ Process 41280 terminated.
 ### Kill processes across multiple ports
 
 ```bash
-portkill 3000 8080 5000
+purgekill 3000 8080 5000
 ```
 
 ### CLI Options
 
 ```bash
-portkill --help       # Show help message
-portkill --version    # Show installed version
+purgekill --help       # Show help message
+purgekill --version    # Show installed version
 ```
 
 ---
@@ -89,7 +89,7 @@ If a process was started by another user or requires elevated permissions (commo
 
 ```bash
 # On Linux / macOS
-sudo portkill 80
+sudo purgekill 80
 ```
 
 ---
@@ -99,12 +99,12 @@ sudo portkill 80
 Clone the repository and link it locally to test changes:
 
 ```bash
-git clone https://github.com/rishhbh/portkill.git
-cd portkill
+git clone https://github.com/rishhbh/purgekill.git
+cd purgekill
 npm link
 ```
 
-Now you can test changes using `portkill <port>` directly from your terminal.
+Now you can test changes using `purgekill <port>` directly from your terminal.
 
 ---
 
@@ -112,13 +112,13 @@ Now you can test changes using `portkill <port>` directly from your terminal.
 
 The following features are planned for upcoming releases:
 
-- **`portkill all` Implementation:** Automatically discover and terminate all processes currently listening on network ports.
+- **`purgekill all` Implementation:** Automatically discover and terminate all processes currently listening on network ports.
 - **Native Windows Support:** Add native Windows process resolution and termination (`netstat -ano`, PowerShell `Get-NetTCPConnection`, `taskkill`) to remove the `lsof` dependency.
 - **Force Mode (`-f` / `--force`):** Allow bypassing the interactive confirmation prompt for non-interactive scripts and CI workflows.
 - **Configurable Kill Signals (`-s` / `--signal`):** Support escalation from `SIGTERM` to `SIGKILL` (`kill -9`) for unresponsive processes.
 - **Multi-PID Handling per Port:** Properly parse and terminate multiple processes sharing or bound to the same port.
 - **Process Inspection:** Display process names, executable paths, or command arguments alongside the PID before prompting for termination.
-- **Port Ranges:** Support scanning and killing port ranges (e.g. `portkill 3000-3005`).
+- **Port Ranges:** Support scanning and killing port ranges (e.g. `purgekill 3000-3005`).
 - **Protocol Filtering:** Add options to filter by protocol (`--tcp` or `--udp`).
 
 ---

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Port Inspection:** Automatic detection of process IDs (PIDs) bound to specified network ports using `lsof`.
 - **Interactive Confirmation:** Prompt asking for confirmation (`[y/n]`) prior to killing any process to prevent accidental terminations.
-- **Multi-Port Support:** Ability to pass multiple ports in a single command (e.g., `portkill 3000 8080`).
+- **Multi-Port Support:** Ability to pass multiple ports in a single command (e.g., `purgekill 3000 8080`).
 - **Process Termination:** Terminate identified processes using `SIGTERM`.
 - **CLI Options:** Built-in `-h`, `--help` and `-v`, `--version` flags.
-- **Executable Binary:** Executable `portkill` binary setup via `package.json` pointing to `src/cli.js`.
+- **Executable Binary:** Executable `purgekill` binary setup via `package.json` pointing to `src/cli.js`.
