@@ -1,16 +1,14 @@
-import { exec } from "node:child_process";
+import { findProcessUnix } from "./platform/unix.js"
+import { findProcessWin32 } from "./platform/windows.js";
 
 export function findProcess(port) {
-    return new Promise((resolve, reject) => {
-        exec(`lsof -i :${port} -t`, (error, stdout) => {
-            if (error) {
-                resolve(null);
-                return;
-            }
+    if (process.platform === 'linux' || process.platform === 'darwin') {
+        return findProcessUnix(port);
+    }
 
-            const pid = stdout.trim();
-
-            resolve(pid || null);
-        });
-    });
+    if (process.platform === 'win32') {
+        return findProcessWin32(port);
+    }
+    
+    throw new Error(`Unsupported operating system: ${process.platform}`);
 }
