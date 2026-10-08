@@ -9,13 +9,14 @@ const args = process.argv.slice(2);
 
 const command = args[0];
 
-if (args.includes("--version") || args.includes("-v")) {
-    console.log(packageJson.version);
-    process.exit(0);
-}
+if (args.some(arg => arg.startsWith("-"))) {
+    if (args.includes("--version") || args.includes("-v")) {
+        console.log(packageJson.version);
+        process.exit(0);
+    }
 
-if (args.includes('--help') || args.includes('-h')) {
-    console.log(`purgeport - Kill processes using network ports
+    if (args.includes('--help') || args.includes('-h')) {
+        console.log(`purgeport - Kill processes using network ports
 
 Usage:
   purgeport <port>...
@@ -23,10 +24,14 @@ Usage:
 
 Options:
   -h, --help       Show help
-  -v, --version    Show version
-`);
+  -v, --version    Show version`);
 
-    process.exit(0);
+        process.exit(0);
+    }
+
+    console.log(`Unknown option: ${args.find(arg => arg.startsWith("-"))}`);
+    console.log(`Try 'purgeport --help' for available options.`);
+    process.exit(1);
 }
 
 if (!command) {
