@@ -1,0 +1,168 @@
+name: Cross-Platform CLI Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check CLI version
+        run: node ./src/cli.js --version
+
+      - name: Check CLI help
+        run: node ./src/cli.js --help
+
+      - name: Test port detection (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PORT_FILE=$(mktemp)
+          SERVER_PID=""
+
+          cleanup() {
+            if [ -n "$SERVER_PID" ]; then
+              kill "$SERVER_PID" 2>/dev/null || true
+              wait "$SERVER_PID" 2>/dev/null || true
+            fi
+            rm -f "$PORT_FILE"
+          }
+
+          trap cleanup EXIT
+
+          node -e '
+            const http = require("node:http");
+            const server = http.createServer((req, res) => res.end("OK"));
+            server.listen(0, "127.0.0.1", () => {
+              console.log(server.address().port);
+            });
+          ' > "$PORT_FILE" 2>&1 &
+
+          SERVER_PID=$!
+
+          for i in {1..50}; do
+            if [ -s "$PORT_FILE" ]; then
+              break
+            fi
+            sleep 0.1
+          done
+
+          if [ ! -s "$PORT_FILE" ]; then
+            echo "Test server failed to start"
+            exit 1
+          fi
+
+          PORT=$(head -n 1 "$PORT_FILE")
+
+          if ! [[ "$PORT" =~ ^[0-9]+$ ]]; then
+            echo "Invalid test port: $PORT"
+            cat "$PORT_FILE"
+            exit 1
+          fi
+
+          OUTPUT=$(node ./src/cli.js "$PORT" <<< "n")
+          echo "$OUTPUT"
+
+          grep -Fq "Port $PORT is being used" <<< "$OUTPUT"
+          grep -Fq "was not terminated" <<< "$OUTPUT"
+
+      - name: Test port detection (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $serverScript = "$env:TEMP\purgeport-test-server.js"
+          $stdoutFile = "$env:TEMP\purgeport-out.txt"
+          $stderrFile = "$env:TEMP\purgeport-err.txt"
+
+          Remove-Item $stdoutFile, $stderrFile -Force -ErrorAction SilentlyContinue
+
+          Set-Content -Path $serverScript -Encoding utf8 -Value @'
+          const http = require("node:http");
+          const server = http.createServer((req, res) => res.end("OK"));
+          server.listen(0, "127.0.0.1", () => {
+            console.log("PORT=" + server.address().port);
+          });
+          '@
+
+          $server = $null
+
+          try {
+            $server = Start-Process `
+              -FilePath "node" `
+              -ArgumentList "`"$serverScript`"" `
+              -RedirectStandardOutput $stdoutFile `
+              -RedirectStandardError $stderrFile `
+              -PassThru
+
+            $port = $null
+
+            for ($i = 0; $i -lt 50; $i++) {
+              Start-Sleep -Milliseconds 100
+
+              if (Test-Path $stdoutFile) {
+                $content = Get-Content $stdoutFile -Raw
+
+                if ($content -match 'PORT=(\d+)') {
+                  $port = $Matches[1]
+                  break
+                }
+              }
+
+              if ($server.HasExited) {
+                break
+              }
+            }
+
+            if (-not $port) {
+              if (Test-Path $stderrFile) {
+                Get-Content $stderrFile | Write-Host
+              }
+
+              throw "Test server failed to start"
+            }
+
+            $output = "n" | node ./src/cli.js $port
+            $exitCode = $LASTEXITCODE
+            $output | Write-Output
+
+            if ($exitCode -ne 0) {
+              throw "purgeport exited with code $exitCode"
+            }
+
+            $text = $output -join "`n"
+
+            if ($text -notmatch "Port $port is being used") {
+              throw "purgeport did not detect the occupied port"
+            }
+
+            if ($text -notmatch "was not terminated") {
+              throw "purgeport did not respect the declined termination"
+            }
+          }
+          finally {
+            if ($server -and -not $server.HasExited) {
+              Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+            }
+
+            Remove-Item `
+              $serverScript, $stdoutFile, $stderrFile `
+              -Force -ErrorAction SilentlyContinue
+          }
