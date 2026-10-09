@@ -22,3 +22,21 @@ export function findProcessWin32(port) {
         });
     });
 }
+
+export function getProcessInfoWin32(pid) {
+    return new Promise((resolve, reject) => {
+        const command = `powershell -NoProfile -Command "$p = Get-CimInstance Win32_Process -Filter 'ProcessId = ${Number(pid)}'; $owner = Invoke-CimMethod -InputObject $p -MethodName GetOwner; [PSCustomObject]@{ user = $owner.User; process = $p.ExecutablePath; args = $p.CommandLine } | ConvertTo-Json -Compress"`;
+        exec(command, (error, stdout) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            try {
+                resolve(JSON.parse(stdout.trim()));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    });
+}

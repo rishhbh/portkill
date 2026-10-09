@@ -1,4 +1,6 @@
-import { exec } from "node:child_process";
+import { getExecutableDarwin, getProcessInfoUnix } from "./platform/unix.js";
+import { getProcessInfoWin32 } from "./platform/windows.js";
+import { getExecutableLinux } from "./platform/unix.js";
 
 export function killProcess(pid) {
     try {
@@ -11,35 +13,29 @@ export function killProcess(pid) {
 }
 
 export function getProcessInfo(pid) {
-    return new Promise((resolve, reject) => {
-        exec(`ps -p ${pid} -o user=,exe=,args=`,
-            (error, stdout) => {
-                if (error) {
-                    reject(error);
-                }
+    if (process.platform === 'linux' || process.platform === 'darwin') {
+        return getProcessInfoUnix(pid);
+    }
 
-                const [user, command, ...args] = stdout.trim().split(/\s+/);
+    if (process.platform === 'win32') {
+        return getProcessInfoWin32(pid);
+    }
 
-                resolve({
-                    pid,
-                    user,
-                    command,
-                    args: args.join(" ")
-                });
-            }
-        )
-    });
+    throw new Error(`Unsupported operating system: ${process.platform}`);
 }
 
 export function getExecutable(pid) {
-    return new Promise((resolve, reject) => {
-        exec(`readlink -f /proc/${pid}/exe`, (error, stdout) => {
-            if (error){
-                reject(error);
-                return;
-            }
+    if (process.platform === 'win32') {
+        return Promise.resolve(null);
+    }
 
-            resolve(stdout.trim());
-        });
-    });
+    if (process.platform === 'linux') {
+        return getExecutableLinux(pid);
+    }
+
+    if (process.platform === 'darwin') {
+        return getExecutableDarwin(pid);
+    }
+
+    throw new Error(`Unsupported operating system: ${process.platform}`);
 }

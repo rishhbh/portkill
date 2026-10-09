@@ -14,3 +14,63 @@ export function findProcessUnix(port) {
         });
     });
 }
+
+export function getProcessInfoUnix(pid) {
+    return new Promise((resolve, reject) => {
+        exec(`ps -p ${pid} -o user=,comm=,args=`,
+            (error, stdout) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+
+                const [user, command, ...args] = stdout.trim().split(/\s+/);
+
+                resolve({
+                    pid,
+                    user,
+                    command,
+                    args: args.join(" ")
+                });
+            }
+        )
+    });
+}
+
+export function getExecutableLinux(pid) {
+    return new Promise((resolve, reject) => {
+        exec(`readlink -f /proc/${pid}/exe`, (error, stdout) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            resolve(stdout.trim());
+        });
+    });
+}
+
+export function getExecutableDarwin(pid) {
+    return new Promise((resolve, reject) => {
+        if (!Number.isInteger(Number(pid)) || Number(pid) <= 0) {
+            reject(new Error("Invalid PID"));
+            return;
+        }
+
+        exec(`lsof -p ${pid} -d txt -Fn`, (error, stdout) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            const executable = stdout.split("\n").find(line => line.startsWith("n/"))?.slice(1);
+
+            if (!executable) {
+                reject(new Error(`Could not find executable for PID ${pid}`));
+                return;
+            }
+
+            resolve(executable);
+        });
+    });
+}

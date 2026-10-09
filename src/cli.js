@@ -53,7 +53,7 @@ for (const port of args) {
     const info = await getProcessInfo(pid);
     const executable = await getExecutable(pid);
 
-    info.process = executable;
+    info.process = executable || info.process;
 
     console.log(`Port ${port} is being used by PID ${pid}.`);
     console.log(`\nUser: ${info.user}\nCommand: ${info.args}\nProcess: ${info.process}\n`);
